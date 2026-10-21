@@ -15,7 +15,7 @@ This repository consolidates open-source tools for AWS DevOps Agent — skills, 
 
 ```
 tools-for-devops-agent/
-├── README.md                 # Project overview with skills/agents/MCP tables
+├── README.md                 # Project overview with links to the docs-site catalogs
 ├── CONTRIBUTING.md           # Contribution guidelines
 ├── llms.txt                  # Structured repo overview for AI tools
 ├── .gitignore                # Root-level ignores
@@ -213,6 +213,7 @@ Only these extensions are permitted inside **skill** directories (enforced by `s
 
 - `scripts/` directories are not supported by DevOps Agent.
 - `.claude/` directories should not be committed (except CLAUDE.md).
+- `.kiro/` directories should not be committed (except `.kiro/steering/`).
 - `.DS_Store` and other OS files should not be committed.
 
 ## AWS Identifiers
@@ -238,23 +239,76 @@ A pull request check (`.github/workflows/scan-aws-identifiers.yml`, running `.gi
 - The `needs-id-redact` label is applied by automation when the check fails and removed when it passes. Do not add or remove it by hand.
 - Identifiers already on `main` are a separate follow-up change. Do not clean them up opportunistically in an unrelated pull request — the check never reports them, since it only reads added lines.
 
+## Common Review Findings
+
+These come up repeatedly in pull request reviews. Check them before opening a PR, and again after each round of review changes.
+
+### Versioning
+
+- A new skill stays at `1.0.0` until it merges, however many review rounds it goes through. `check_history` compares against the merge base, where the skill doesn't exist yet, so `1.0.1` or `1.0.2` on an unmerged skill fails the check. Record review changes under the single `1.0.0` CHANGELOG entry.
+- An existing skill moves one step per PR (next patch, minor or major), not one step per commit.
+
+### Docs site links
+
+The docs site renders each skill's and custom agent's `README.md` as a page one level below the site root, so relative links that work on GitHub may not work on the site.
+
+- Link to anything outside `skills/` and `custom-agents/` (for example `cloudformation/devops-agent-skill-policies.yaml`) with an absolute `https://github.com/aws/tools-for-devops-agent/blob/main/...` URL. A relative link there fails `mkdocs build --strict`.
+- In a custom agent README, link required skills in the Prerequisites section as `../../skills/<skill-name>/`. `docs/hooks/agents_catalog.py` reads skill tags for the agent card from that relative form only, so an absolute URL drops the tag.
+- The agent card lists only tools named `use_*` in backticks in the "Creating the Agent" section. Other tools (for example `verify_aws_claim`) don't appear on the card.
+- A skill's display name comes from its folder name: each hyphenated word is capitalized unless it is in `acronyms` in `docs/hooks/skills_catalog.py`, so `eos-cost-analysis` shows as "Eos Cost Analysis" until `eos` is added. Add a new acronym there in the same PR if the name needs one. A custom agent's display name is its README title, minus any " — Custom Agent" suffix.
+
+### IAM permissions
+
+- Before adding a statement to `cloudformation/devops-agent-skill-policies.yaml`, check the current `AIDevOpsAgentAccessPolicy` managed policy and add only the actions it doesn't grant. If the managed policy covers everything, list the skill under "Skills covered by AIDevOpsAgentAccessPolicy" instead.
+- Use IAM action prefixes in permission lists, not API client names. They differ for some services, for example OpenSearch Service is `opensearch` as an API client but `es:` in IAM.
+- In README prerequisites, state which permissions the managed policy covers and point to the template parameter for the rest, rather than restating every action, so the two can't drift apart.
+
+### Facts the skill asserts
+
+- Don't hardcode prices, dates or limits the agent can retrieve at runtime. If a skill needs reference values for sanity checks, keep them in one labelled table and point to it from everywhere else.
+- Check region-dependent facts outside `us-east-1`. For example, AWS Pricing API usagetypes have no region prefix in `us-east-1` but carry one (`USW2-`, `EU-`, `APS3-`) in every other region, and a rule tested only in `us-east-1` looks correct.
+- Verify each API naming or format rule with a live call before writing it into `SKILL.md` or an eval assertion.
+
+### Trigger scope
+
+- Read the `description` of every existing skill for the same services before writing yours. If a prompt could reasonably activate both, narrow your description, say which skill handles the neighbouring case, and add that case to the eval queries as `should_trigger: false`.
+- Cross-reference the neighbouring skill from the README's Related section.
+
+### Evaluation runs
+
+- Run functional evals against an account that holds resources the skill acts on, including at least one in a non-default region if the skill's behaviour depends on region. An empty account passes discovery assertions without classifying or pricing anything.
+- Compare with-skill and without-skill results scenario by scenario. When the baseline fails an assertion, check whether the baseline was right before treating it as a win, because the assertion may encode a mistake.
+- A scenario where both runs pass every assertion shows the skill adds nothing there. Either drop it or make it harder.
+
+### Before opening or updating a PR
+
+Commit first (the skill checks read Git objects, not the working tree), then run:
+
+```bash
+python3 .github/scripts/validate_skills.py --base-ref origin/main
+python3 .github/scripts/validate_skill_evals.py --skill <skill-name>
+python3 -m pip install mkdocs-material==9.6.14 && mkdocs build --strict
+```
+
+Fix every error, and the warnings for the skill you touched. Pull requests from forks may need a maintainer to approve the workflow run before these checks appear on the PR, so a PR with no checks has not passed them.
+
 ## Adding a New Skill
 
 1. Create a new directory under `skills/` with the skill name.
 2. Add a `SKILL.md` with frontmatter and step-by-step instructions following the writing guidelines above.
 3. Add a `README.md` following the structure described above.
-4. Add a `CHANGELOG.md` starting at version 1.0.0.
+4. Add a `CHANGELOG.md` starting at version 1.0.0. The version stays 1.0.0 until the skill merges (see Common Review Findings).
 5. Add evaluation tests (`evals/` directory).
-6. Test the skill with DevOps Agent before submitting.
-7. Update the root `README.md` skills table with the new skill's name, description, agent types, author, and docs link.
-8. Update the `llms.txt` file at the repo root — add the new skill to the "Available Skills" section following the existing format: `- [Skill Name](skills/<name>/SKILL.md): One-line description`.
-9. If the skill requires IAM permissions beyond the `AIDevOpsAgentAccessPolicy` managed policy, add a new parameter, condition, and inline policy resource to `cloudformation/devops-agent-skill-policies.yaml`, and update the `SkillPolicySummary` output.
+6. Test the skill with DevOps Agent before submitting, and run the checks under "Before opening or updating a PR".
+7. No root `README.md` change is needed: the docs-site catalog and the skill's page are generated from `SKILL.md` and `README.md` at build time. Check how they render with `mkdocs build --strict` (see Common Review Findings).
+7. Update the `llms.txt` file at the repo root — add the new skill to the "Available Skills" section following the existing format: `- [Skill Name](skills/<name>/SKILL.md): One-line description`.
+8. If the skill requires IAM permissions beyond the `AIDevOpsAgentAccessPolicy` managed policy, add a new parameter, condition, and inline policy resource to `cloudformation/devops-agent-skill-policies.yaml`, and update the `SkillPolicySummary` output.
 
 ## Maintaining llms.txt
 
 The `llms.txt` file at the repo root provides AI tools with a structured overview of this repository. Keep it in sync:
 
-- **Available Skills / Available Custom Agents / Available MCP Servers sections**: Update the matching section whenever a tool of that type is added, removed, or renamed (for skills, this is step 8 above).
+- **Available Skills / Available Custom Agents / Available MCP Servers sections**: Update the matching section whenever a tool of that type is added, removed, or renamed (for skills, this is step 7 above).
 - **Repository Structure section**: Update whenever the directory structure conventions change (e.g., new required files, new directories, renamed paths).
 
 ## Zipping for Upload
