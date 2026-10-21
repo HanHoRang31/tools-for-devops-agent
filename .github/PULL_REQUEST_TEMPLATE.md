@@ -63,7 +63,7 @@ before this check existed" in CONTRIBUTING.md.
 
 - [ ] `SKILL.md` frontmatter is valid: `name` matches the directory, `description` present and within length limits, body at most 500 lines.
 - [ ] The `description` is written from the agent's point of view — scenarios, services, error types, symptoms.
-- [ ] Scoped to a specific agent type in `metadata.agent_types` (`INCIDENT_RCA`, `INCIDENT_TRIAGE`, `INCIDENT_MITIGATION`, …), not left `GENERIC` without reason.
+- [ ] Scoped to a specific agent type in `metadata.aws-devops-agent-skills.agent-types` (`INCIDENT_RCA`, `INCIDENT_TRIAGE`, `INCIDENT_MITIGATION`, …), not left `GENERIC` without reason.
 - [ ] Procedures are structured as decision trees on real conditions, not flat prose.
 - [ ] Reference material lives in `references/` or `assets/` and loads on demand.
 - [ ] Non-executable content only — **no scripts or code** in the skill directory. Deterministic compute belongs in an MCP server.
