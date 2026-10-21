@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.5
+- Agent types now use the API values in `metadata.aws-devops-agent-skills.agent-types` (`CHAT`, `INCIDENT_RCA`, `INCIDENT_TRIAGE`), the field that sets which agents load the skill.
+
 ## 1.0.4
 
 Eval coverage only. No change to the skill's instructions.
