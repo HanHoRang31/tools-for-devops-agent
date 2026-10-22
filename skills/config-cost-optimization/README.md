@@ -55,10 +55,9 @@ The skill operates entirely in **read-only** mode — it never calls `PutConfigu
 
 ## Agent Types
 
-- **On-demand (Chat tasks)** — "why is my Config bill so high", "should I use daily or continuous recording".
-- **Evaluation** — proactive cost-optimization recommendations.
+- **Chat tasks** — "why is my Config bill so high", "should I use daily or continuous recording".
 
-Select **Generic** (All agents) if you want the skill available to all agent types — required if you use it with the `unified-security-cost-optimizer` custom agent.
+Select **All agents** if you want the skill available to all agent types — required if you use it with the `unified-security-cost-optimizer` custom agent.
 
 ## Uploading to AWS DevOps Agent
 
@@ -72,7 +71,7 @@ zip -r ../config-cost-optimization.zip . \
   -x 'README.md' 'CHANGELOG.md' '.skilleval.yaml' '.skilleval.yml' 'evals/*'
 ```
 
-Then in the Operator Web App: **Skills → Add skill → Upload skill**, drag in the zip, select agent types (**On-demand** and **Evaluation**, or **Generic** for the custom agent), review validation, and **Upload**.
+Then in the Operator Web App: **Skills → Add skill → Upload skill**, drag in the zip, select agent types (**Chat tasks**, or **All agents** for the custom agent), review validation, and **Upload**.
 
 ## How to Use This Skill
 

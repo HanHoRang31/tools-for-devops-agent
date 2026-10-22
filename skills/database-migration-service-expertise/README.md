@@ -19,9 +19,8 @@ When activated via Chat, this skill instructs the DevOps Agent to:
 This skill is intended for the following agent types (selected in the Operator Web App at upload time):
 
 - **Chat tasks** — conversational invocation in Chat ("review my DMS environment", "troubleshoot DMS task failure").
-- **Evaluation** — proactive operational improvement recommendations.
 
-Select **Generic** instead if you want the skill available to all agent types.
+Select **All agents** instead if you want the skill available to all agent types.
 
 ## Prerequisites
 
@@ -100,7 +99,7 @@ Constraints (enforced at upload time):
 1. Navigate to the **Skills** page in your Agent Space Operator Web App.
 2. Click **Add skill** → **Upload skill**.
 3. Drag and drop `database-migration-service-expertise.zip` (or browse to it).
-4. Select agent types: **Chat tasks** and **Evaluation** (or leave **Generic** to make it available to all agent types).
+4. Select agent types: **Chat tasks** (or leave **All agents** to make it available to all agent types).
 5. Review the validation results.
 6. Click **Upload**.
 
