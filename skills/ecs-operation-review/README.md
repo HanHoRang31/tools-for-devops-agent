@@ -30,10 +30,9 @@ Pillars graded: **Resiliency & HA (REL), Observability (OBS), Security (SEC), Op
 
 Intended for these agent types (selected in the Operator Web App at upload time):
 
-- **On-demand** — conversational invocation in Chat ("run an ECS operations review on service X", "ECS security review").
-- **Evaluation** — proactive operational improvement recommendations.
+- **Chat tasks** — conversational invocation in Chat ("run an ECS operations review on service X", "ECS security review").
 
-Select **Generic** to make the skill available to all agent types.
+Select **All agents** to make the skill available to all agent types.
 
 ## Prerequisites
 
@@ -81,7 +80,7 @@ Upload-time constraints: `SKILL.md` required with `name` + `description` frontma
 1. Open the **Skills** page in your Agent Space Operator Web App.
 2. **Add skill** → **Upload skill**.
 3. Drag and drop `ecs-operation-review.zip`.
-4. Select agent types: **On-demand** and **Evaluation** (or **Generic**).
+4. Select agent types: **Chat tasks** (or **All agents** if you want to apply the skill to all agent types).
 5. Review validation results → **Upload**.
 
 ## Usage
